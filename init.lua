@@ -100,7 +100,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
       formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
       formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
       minetest.show_formspec(player:get_player_name(), "search_results", formspec)
-      return true -- Return true to prevent the formspec from closing
+      return true
     end
   end
 end)
