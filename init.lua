@@ -23,10 +23,10 @@ DEALINGS IN THE SOFTWARE.
 
 local mod_storage = minetest.get_mod_storage()
 
-local function register_message(player_name, message)
+local function register_message(message)
   local saved_messages = mod_storage:get_string("saved_messages")
   message = message:gsub("%[", "("):gsub("%]", ")"):gsub("%.", ",")
-  saved_messages = saved_messages .. "\n" .. "# "..os.date("%Y-%m-%d %H:%M:%S").." | " .. player_name .. message
+  saved_messages = saved_messages .. "\n" .. "# "..os.date("%Y-%m-%d %H:%M:%S").." | " .. message
   local message_list = {}
   for line in saved_messages:gmatch("[^\n]+") do
     table.insert(message_list, line)
@@ -39,25 +39,25 @@ local function register_message(player_name, message)
 end
 
 minetest.register_on_chat_message(function(player_name, message)
-  register_message(player_name, ": "..message)
+  register_message(player_name..": "..message)
 end)
 
 minetest.register_on_joinplayer(function(player)
   local player_name = player:get_player_name()
-  register_message("*** Server: "..player_name, " joined the game")
+  register_message("*** Server: "..player_name.." joined the game")
 end)
 
 minetest.register_on_leaveplayer(function(player)
   local player_name = player:get_player_name()
-  register_message("*** Server: "..player_name, " left the game")
+  register_message("*** Server: "..player_name.." left the game")
 end)
 
 minetest.register_on_shutdown(function()
-  register_message("*** Server", " shutting down!")
+  register_message("*** Server shutting down!")
 end)
 
 minetest.after(1, function()
-  register_message("*** Server", " started!")
+  register_message("*** Server started!")
 end)
 
 -- Command to show the last 100 messages
@@ -72,7 +72,8 @@ minetest.register_chatcommand("chatlog", {
     local formspec = "size[10,10]"
     formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Last 500 messages..." .. "]"
     formspec = formspec .. "box[-0.1,-0.1;10,0.7;black]"
-    formspec = formspec .. "textarea[0.2,0.7;10.2,10;messages;;" .. table.concat(message_list, "\n") .. "]"
+    formspec = formspec .. "box[-0.1,0.7;10,8.55;#030303]"
+    formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(message_list, "\n") .. "]"
     formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
     formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
 
@@ -81,8 +82,8 @@ minetest.register_chatcommand("chatlog", {
 })
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-  if formname == "last_messages" then
-    if fields.search_button then
+  if formname == "last_messages" or formname == "search_results" then
+    if fields.search then
       local keyword = fields.search:lower()
       local saved_messages = mod_storage:get_string("saved_messages")
       local message_list = {}
@@ -94,29 +95,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
       local formspec = "size[10,10]"
       formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Search results for '" .. keyword .. "':" .. "]"
       formspec = formspec .. "box[-0.1,-0.1;10,0.7;black]"
-      formspec = formspec .. "textarea[0.2,0.7;10.2,10;messages;;" .. table.concat(message_list, "\n") .. "]"
+      formspec = formspec .. "box[-0.1,0.7;10,8.55;#030303]"
+      formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(message_list, "\n") .. "]"
       formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
       formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
       minetest.show_formspec(player:get_player_name(), "search_results", formspec)
-    end
-  end
-  if formname == "search_results" then
-    if fields.search_button then
-      local keyword = fields.search:lower()
-      local saved_messages = mod_storage:get_string("saved_messages")
-      local message_list = {}
-      for line in saved_messages:gmatch("[^\n]+") do
-        if line:lower():find(keyword) then
-          table.insert(message_list, line)
-        end
-      end
-      local formspec = "size[10,10]"
-      formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Search results for '" .. keyword .. "':" .. "]"
-      formspec = formspec .. "box[-0.1,-0.1;10,0.7;black]"
-      formspec = formspec .. "textarea[0.2,0.7;10.2,10;messages;;" .. table.concat(message_list, "\n") .. "]"
-      formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
-      formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
-      minetest.show_formspec(player:get_player_name(), "search_results", formspec)
+      return true -- Return true to prevent the formspec from closing
     end
   end
 end)
