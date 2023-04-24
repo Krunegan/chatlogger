@@ -60,7 +60,6 @@ minetest.after(1, function()
   register_message("*** Server started!")
 end)
 
--- Command to show the last 100 messages
 minetest.register_chatcommand("chatlog", {
   description = "Show the last 500 registered messages",
   func = function(player_name)
