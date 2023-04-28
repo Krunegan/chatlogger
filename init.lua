@@ -93,7 +93,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
       formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Search results for '" .. keyword .. "':" .. "]"
       formspec = formspec .. "box[-0.1,-0.1;10,0.7;black]"
       formspec = formspec .. "box[-0.1,0.7;10,8.55;#030303]"
-      formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(message_list, "\n") .. "]"
+      formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(message_list_filtered, "\n") .. "]"
       formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
       formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
       minetest.show_formspec(player:get_player_name(), "search_results", formspec)
