@@ -23,20 +23,25 @@ DEALINGS IN THE SOFTWARE.
 
 local mod_storage = minetest.get_mod_storage()
 
-local function register_message(message)
-  local saved_messages = mod_storage:get_string("saved_messages")
-  message = message:gsub("%[", "("):gsub("%]", ")"):gsub("%.", ",")
-  saved_messages = saved_messages .. "\n" .. "# "..os.date("%Y-%m-%d %H:%M:%S").." | " .. message
-  local message_list = {}
-  for line in saved_messages:gmatch("[^\n]+") do
-    table.insert(message_list, line)
-    if #message_list > 500 then
-      table.remove(message_list, 1)
-    end
-  end
-  saved_messages = table.concat(message_list, "\n")
-  mod_storage:set_string("saved_messages", saved_messages)
+local saved_messages = mod_storage:get_string("saved_messages")
+local msg = {}
+
+for line in saved_messages:gmatch("[^\n]+") do
+  table.insert(msg, line)
 end
+
+local function register_message(message)
+  message = message:gsub("%[", "("):gsub("%]", ")"):gsub("%.", ",")
+  table.insert(msg, "# "..os.date("%Y-%m-%d %H:%M:%S").." | " .. message)
+  if #msg > 500 then
+    table.remove(msg, 1)
+  end
+end
+
+minetest.register_on_shutdown(function()
+  local saved_messages = table.concat(msg, "\n")
+  mod_storage:set_string("saved_messages", saved_messages)
+end)
 
 minetest.register_on_chat_message(function(player_name, message)
   register_message(player_name..": "..message)
@@ -63,16 +68,11 @@ end)
 minetest.register_chatcommand("chatlog", {
   description = "Show the last 500 registered messages",
   func = function(player_name)
-    local saved_messages = mod_storage:get_string("saved_messages")
-    local message_list = {}
-    for line in saved_messages:gmatch("[^\n]+") do
-      table.insert(message_list, line)
-    end
     local formspec = "size[10,10]"
     formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Last 500 messages..." .. "]"
     formspec = formspec .. "box[-0.1,-0.1;10,0.7;black]"
     formspec = formspec .. "box[-0.1,0.7;10,8.55;#030303]"
-    formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(message_list, "\n") .. "]"
+    formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(msg, "\n") .. "]"
     formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
     formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
 
@@ -84,18 +84,17 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
   if formname == "last_messages" or formname == "search_results" then
     if fields.search then
       local keyword = fields.search:lower()
-      local saved_messages = mod_storage:get_string("saved_messages")
-      local message_list = {}
-      for line in saved_messages:gmatch("[^\n]+") do
+      local msg_filtered = {}
+      for _, line in ipairs(msg) do
         if line:lower():find(keyword) then
-          table.insert(message_list, line)
+          table.insert(msg_filtered, line)
         end
       end
       local formspec = "size[10,10]"
       formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Search results for '" .. keyword .. "':" .. "]"
       formspec = formspec .. "box[-0.1,-0.1;10,0.7;black]"
       formspec = formspec .. "box[-0.1,0.7;10,8.55;#030303]"
-      formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(message_list, "\n") .. "]"
+      formspec = formspec .. "textarea[0.2,0.7;10.2,10;;;" .. table.concat(msg_filtered, "\n") .. "]"
       formspec = formspec .. "field[0.2,9.7;3,1;search;;]"
       formspec = formspec .. "button[2.85,9.34;2,1.1;search_button;Search]"
       minetest.show_formspec(player:get_player_name(), "search_results", formspec)
