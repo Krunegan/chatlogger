@@ -23,14 +23,12 @@ DEALINGS IN THE SOFTWARE.
 
 local mod_storage = minetest.get_mod_storage()
 
--- Obtener los mensajes guardados en mod_storage al inicio del servidor
 local saved_messages = mod_storage:get_string("saved_messages")
 local message_list = {}
 for line in saved_messages:gmatch("[^\n]+") do
   table.insert(message_list, line)
 end
 
--- Función para registrar un mensaje en la variable de mensajes
 local function register_message(message)
   message = message:gsub("%[", "("):gsub("%]", ")"):gsub("%.", ",")
   table.insert(message_list, "# "..os.date("%Y-%m-%d %H:%M:%S").." | " .. message)
@@ -39,7 +37,6 @@ local function register_message(message)
   end
 end
 
--- Función para guardar los mensajes en mod_storage al apagar el servidor
 minetest.register_on_shutdown(function()
   local saved_messages = table.concat(message_list, "\n")
   mod_storage:set_string("saved_messages", saved_messages)
@@ -67,7 +64,6 @@ minetest.after(1, function()
   register_message("*** Server started!")
 end)
 
--- Registrar el comando de chat para mostrar los últimos 500 mensajes
 minetest.register_chatcommand("chatlog", {
   description = "Show the last 500 registered messages",
   func = function(player_name)
