@@ -66,6 +66,9 @@ end)
 
 minetest.register_chatcommand("chatlog", {
   description = "Show the last 500 registered messages",
+  privs = {
+		interact = true
+	},
   func = function(player_name)
     local formspec = "size[10,10]"
     formspec = formspec .. "label[0,0;" .. "# "..minetest.colorize("orange", "CHAT LOGGER").." | Last 500 messages..." .. "]"
