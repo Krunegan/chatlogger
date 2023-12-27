@@ -32,7 +32,7 @@ end
 local function register_message(message)
   message = message:gsub("%[", "("):gsub("%]", ")"):gsub("%.", ",")
   table.insert(message_list, "# "..os.date("%Y-%m-%d %H:%M:%S").." | " .. message)
-  if #message_list > 500 then
+  if #message_list > 100 then
     table.remove(message_list, 1)
   end
 end
