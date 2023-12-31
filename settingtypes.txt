@@ -1,0 +1,8 @@
+# Number of messages to be stored and displayed in chat logger
+chatlogger.number_of_messages (Number of messages) int 500
+
+# Whether the 'chatlogs' privilege is required to access chat logs
+chatlogger.needs_priv (Require 'chatlogs' privilege) bool true
+
+# Format of the datetime stamp in chat logs
+chatlogger.datetime_format (Datetime format) string %Y-%m-%d %H:%M:%S
