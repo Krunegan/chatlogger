@@ -1,6 +1,6 @@
 ## Chat Logger
 
-Allows players to see the last 500 chat messages, also allows you to search for keywords
+Allows players to see the last 100 chat messages, also allows you to search for keywords
 
 ## License
 
