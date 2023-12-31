@@ -21,7 +21,7 @@ DEALINGS IN THE SOFTWARE.
 
 ]]
 local mod_storage = minetest.get_mod_storage()
-local number_of_messages = tonumber(settings:get("chatlogger.number_of_messages")) or 500
+local number_of_messages = tonumber(minetest.settings:get("chatlogger.number_of_messages")) or 500
 local needs_priv = minetest.settings:get_bool("chatlogger.needs_priv") or true
 local datetime_format = minetest.settings:get("chatlogger.datetime_format") or "%Y-%m-%d %H:%M:%S"
 
